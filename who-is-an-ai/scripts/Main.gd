@@ -124,6 +124,8 @@ var _typing_sent := false
 var _intro_root: ColorRect
 var _intro_label: Label
 
+var _step_timer := 0.0
+const STEP_INTERVAL := 0.30   # délai entre deux pas (plus petit = pas plus rapides)
 
 func _ready() -> void:
 	_setup_input()
@@ -796,6 +798,13 @@ func _physics_process(delta: float) -> void:
 			node.look_at(node.position + Vector3(dir.x, 0.0, dir.y), Vector3.UP)
 			_set_anim(Net.detective_id, "run")
 			_det_move_cooldown = 0.2
+			# Footstep cadence: play a step every STEP_INTERVAL while moving.
+			_step_timer -= delta
+			if _step_timer <= 0.0:
+				_step_timer = STEP_INTERVAL
+				Sfx.play(["footstep1", "footstep2", "footstep3"].pick_random())
+		else:
+			_step_timer = 0.0   # reset so the next step plays immediately
 		_pos_timer += delta
 		if _pos_timer >= 0.08:
 			_pos_timer = 0.0
@@ -1008,6 +1017,7 @@ func _build_ui() -> void:
 func _on_play_pressed() -> void:
 	Sfx.play("click")
 	Sfx.start_ambience()
+	Sfx.start_bgm()
 	if not _connected:
 		# First press: connect (auto host-or-join decided in the background).
 		ui_btn_start.disabled = true

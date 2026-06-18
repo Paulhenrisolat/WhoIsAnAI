@@ -27,6 +27,9 @@ const SOUNDS := {
 	"match_found": { "path": "res://assets/audio/match_found.ogg", "vol": -3.0 },
 	"joined":      { "path": "res://assets/audio/joined.wav",      "vol": 0.0 },
 	"gameover":    { "path": "res://assets/audio/gameover.ogg",    "vol": 0.0 },
+	"footstep1":    { "path": "res://assets/audio/footstep1.wav",    "vol": -8.0 },
+	"footstep2":    { "path": "res://assets/audio/footstep2.wav",    "vol": -8.0 },
+	"footstep3":    { "path": "res://assets/audio/footstep3.wav",    "vol": -8.0 },
 }
 const AMBIENCE := "res://assets/audio/ambience.ogg"
 const POOL_SIZE := 8
@@ -37,6 +40,8 @@ var _pool: Array = []         # reusable AudioStreamPlayer nodes
 var _pool_idx := 0
 var _ambience_player: AudioStreamPlayer
 
+const BGM := "res://assets/audio/GalacticDrift.mp3"
+var _bgm_player: AudioStreamPlayer
 
 func _ready() -> void:
 	for n in SOUNDS:
@@ -56,7 +61,10 @@ func _ready() -> void:
 	_ambience_player.bus = "Master"
 	_ambience_player.volume_db = -12.0
 	add_child(_ambience_player)
-
+	_bgm_player = AudioStreamPlayer.new()
+	_bgm_player.bus = "Master"
+	_bgm_player.volume_db = -15.0   # ajuste le volume de la musique ici
+	add_child(_bgm_player)
 
 ## Play a one-shot sound. If volume_db is left at NAN, the clip's default
 ## volume from the SOUNDS table is used; pass a number to override it.
@@ -85,3 +93,13 @@ func start_ambience() -> void:
 
 func stop_ambience() -> void:
 	_ambience_player.stop()
+
+
+func start_bgm() -> void:
+	if _bgm_player.playing or not ResourceLoader.exists(BGM):
+		return
+	var stream = load(BGM)
+	if stream is AudioStreamOggVorbis:
+		stream.loop = true
+	_bgm_player.stream = stream
+	_bgm_player.play()
